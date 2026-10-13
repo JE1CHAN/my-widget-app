@@ -1,0 +1,424 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <style>
+      :root {
+        --text: #f4f4f7;
+        --muted: rgba(244, 244, 247, 0.6);
+        --hover: rgba(255, 255, 255, 0.07);
+        --field: rgba(255, 255, 255, 0.07);
+        --field-focus: rgba(255, 255, 255, 0.12);
+        --t: 120ms;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      html,
+      body {
+        height: 100%;
+        margin: 0;
+        background: transparent;
+        overflow: hidden;
+      }
+      body {
+        font:
+          14px/1.4 "Segoe UI Variable Text",
+          "Segoe UI",
+          sans-serif;
+        color: var(--text);
+      }
+      button {
+        font: inherit;
+        color: inherit;
+        background: none;
+        border: none;
+        cursor: pointer;
+      }
+      :focus-visible {
+        outline: 2px solid rgba(255, 255, 255, 0.5);
+        outline-offset: 1px;
+      }
+
+      .wrap {
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        padding: 26px 26px 24px;
+        border-radius: 22px;
+      }
+      html.no-blur .wrap {
+        background: rgba(26, 26, 32, 0.9);
+      }
+
+      .header {
+        -webkit-app-region: drag;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 16px;
+      }
+      .title {
+        font-size: 22px;
+        font-weight: 600;
+        letter-spacing: -0.01em;
+      }
+
+      .icon-btn {
+        -webkit-app-region: no-drag;
+        width: 28px;
+        height: 28px;
+        border-radius: 8px;
+        flex: none;
+        display: grid;
+        place-items: center;
+        color: var(--muted);
+        transition:
+          background var(--t) ease,
+          color var(--t) ease,
+          opacity var(--t) ease;
+      }
+      .icon-btn:hover {
+        background: var(--hover);
+        color: var(--text);
+      }
+
+      .people {
+        display: flex;
+        gap: 6px;
+        margin-bottom: 18px;
+      }
+
+      .list {
+        flex: 1;
+        overflow-y: auto;
+        margin: 0 -8px;
+        padding: 0 8px;
+      }
+      .list::-webkit-scrollbar {
+        width: 0;
+      }
+      .cols,
+      .row {
+        display: grid;
+        grid-template-columns: 1fr 96px 130px 28px;
+        gap: 10px;
+        align-items: center;
+      }
+      .cols {
+        color: var(--muted);
+        font-size: 12px;
+        font-weight: 600;
+        padding: 0 8px 6px;
+        margin: 0 -8px;
+      }
+      .row {
+        min-height: 38px;
+        padding: 4px 8px;
+        margin: 0 -8px;
+        border-radius: 8px;
+        transition: background var(--t) ease;
+      }
+      .row:hover {
+        background: var(--hover);
+      }
+      .row .title-cell {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        min-width: 0;
+        word-break: break-word;
+      }
+      .row .title-cell svg {
+        flex: none;
+        color: var(--muted);
+      }
+      .row .muted {
+        color: var(--muted);
+      }
+      .row .del {
+        opacity: 0;
+      }
+      .row:hover .del,
+      .row:focus-within .del {
+        opacity: 1;
+      }
+      .empty {
+        color: var(--muted);
+        padding: 24px 0;
+        text-align: center;
+      }
+
+      .form {
+        margin-top: 22px;
+        display: grid;
+        gap: 8px;
+      }
+      .field {
+        background: var(--field);
+        border: none;
+        border-radius: 8px;
+        padding: 9px 10px;
+        font: inherit;
+        color: inherit;
+        outline: none;
+        color-scheme: dark;
+        transition: background var(--t) ease;
+      }
+      .field:focus {
+        background: var(--field-focus);
+      }
+      .days,
+      .times {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        align-items: center;
+      }
+      .times label {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        color: var(--muted);
+      }
+      .toggle {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        padding: 7px 11px;
+        border-radius: 8px;
+        background: var(--field);
+        color: var(--muted);
+        font-size: 13px;
+        transition:
+          background var(--t) ease,
+          color var(--t) ease;
+      }
+      .toggle:hover {
+        background: var(--field-focus);
+        color: var(--text);
+      }
+      .toggle[aria-pressed="true"] {
+        background: rgba(255, 255, 255, 0.92);
+        color: #1b1b21;
+        font-weight: 600;
+      }
+      .times .toggle {
+        margin-left: auto;
+      }
+      .add {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        padding: 10px;
+        border-radius: 8px;
+        background: var(--field);
+        font-weight: 600;
+        transition: background var(--t) ease;
+      }
+      .add:hover {
+        background: var(--field-focus);
+      }
+      #msg {
+        min-height: 18px;
+        color: var(--muted);
+        font-size: 13px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <header class="header">
+        <div class="title" id="title">School schedule</div>
+        <button
+          class="icon-btn"
+          id="closeBtn"
+          title="Close"
+          aria-label="Close"
+        ></button>
+      </header>
+
+      <div class="people" id="people"></div>
+
+      <div class="cols">
+        <span>Description</span><span>Days</span><span>Time</span><span></span>
+      </div>
+      <div class="list" id="rows"></div>
+
+      <div class="form">
+        <input class="field" type="text" id="desc" placeholder="Subject" />
+        <div class="days" id="days"></div>
+        <div class="times">
+          <label>Start <input class="field" type="time" id="start" /></label>
+          <label>End <input class="field" type="time" id="end" /></label>
+          <button class="toggle" id="labBtn" aria-pressed="false"></button>
+        </div>
+        <div id="msg" role="alert"></div>
+        <button class="add" id="add"></button>
+      </div>
+    </div>
+
+    <script src="shared.js"></script>
+    <script>
+      let classes = [];
+      let isLab = false;
+      let current = PEOPLE[0].id;
+      const selected = new Set();
+
+      const currentPerson = () => PEOPLE.find((p) => p.id === current);
+
+      document.getElementById("closeBtn").innerHTML = icon("x");
+      document.getElementById("add").innerHTML =
+        icon("plus") + "<span>Add class</span>";
+
+      function renderPeople() {
+        document.getElementById("title").textContent =
+          scheduleTitle(currentPerson());
+        const box = document.getElementById("people");
+        box.innerHTML = "";
+        PEOPLE.forEach((p) => {
+          const on = p.id === current;
+          const b = document.createElement("button");
+          b.className = "toggle";
+          b.setAttribute("aria-pressed", String(on));
+          b.innerHTML =
+            (on ? icon("check", 12) : "") + "<span>" + p.name + "</span>";
+          b.onclick = () => {
+            current = p.id;
+            renderPeople();
+            renderRows();
+          };
+          box.appendChild(b);
+        });
+      }
+
+      function renderLabBtn() {
+        const b = document.getElementById("labBtn");
+        b.setAttribute("aria-pressed", String(isLab));
+        b.innerHTML = icon("flask", 14) + "<span>Lab</span>";
+      }
+
+      function renderDays() {
+        const box = document.getElementById("days");
+        box.innerHTML = "";
+        DAY_ORDER.forEach((d) => {
+          const on = selected.has(d);
+          const b = document.createElement("button");
+          b.className = "toggle";
+          b.setAttribute("aria-pressed", String(on));
+          b.innerHTML =
+            (on ? icon("check", 12) : "") + "<span>" + d + "</span>";
+          b.onclick = () => {
+            on ? selected.delete(d) : selected.add(d);
+            renderDays();
+          };
+          box.appendChild(b);
+        });
+      }
+
+      function renderRows() {
+        const list = document.getElementById("rows");
+        list.innerHTML = "";
+        const mine = classes.filter((c) => ownerOf(c) === current);
+        if (!mine.length) {
+          const e = document.createElement("div");
+          e.className = "empty";
+          e.textContent =
+            "No classes yet for " + currentPerson().name + ". Add one below.";
+          list.appendChild(e);
+          return;
+        }
+        mine.forEach((c) => {
+          const row = document.createElement("div");
+          row.className = "row";
+
+          const title = document.createElement("div");
+          title.className = "title-cell";
+          if (c.lab) title.innerHTML = icon("flask", 14);
+          const t = document.createElement("span");
+          t.textContent = classTitle(c);
+          if (c.lab && !c.desc) t.className = "muted";
+          title.appendChild(t);
+
+          const days = document.createElement("div");
+          days.textContent = daysLabel(c.days);
+          const time = document.createElement("div");
+          time.textContent = timeRange(c);
+
+          const del = document.createElement("button");
+          del.className = "icon-btn del";
+          del.title = "Delete";
+          del.setAttribute("aria-label", "Delete");
+          del.innerHTML = icon("trash");
+          del.onclick = () => {
+            classes.splice(classes.indexOf(c), 1);
+            db.set("classes", classes);
+            renderRows();
+          };
+
+          row.append(title, days, time, del);
+          list.appendChild(row);
+        });
+      }
+
+      document.getElementById("labBtn").onclick = () => {
+        isLab = !isLab;
+        renderLabBtn();
+      };
+
+      document.getElementById("add").onclick = () => {
+        const desc = document.getElementById("desc").value.trim();
+        const start = document.getElementById("start").value;
+        const end = document.getElementById("end").value;
+        const msg = document.getElementById("msg");
+
+        if (!desc && !isLab) {
+          msg.textContent = "Enter a subject, or mark it as a lab.";
+          return;
+        }
+        if (!selected.size) {
+          msg.textContent = "Pick at least one day.";
+          return;
+        }
+        if (!start || !end) {
+          msg.textContent = "Set a start and end time.";
+          return;
+        }
+        msg.textContent = "";
+
+        classes.push({
+          id: Date.now(),
+          owner: current,
+          desc,
+          days: [...selected],
+          start,
+          end,
+          lab: isLab,
+        });
+        db.set("classes", classes);
+        document.getElementById("desc").value = "";
+        isLab = false;
+        selected.clear();
+        renderLabBtn();
+        renderDays();
+        renderRows();
+      };
+
+      document.getElementById("closeBtn").onclick = () => db.closeWindow();
+      db.onUpdate((d) => {
+        classes = d.classes || [];
+        renderRows();
+      });
+
+      (async () => {
+        const d = await db.load();
+        classes = d.classes || [];
+        renderPeople();
+        renderLabBtn();
+        renderDays();
+        renderRows();
+      })();
+    </script>
+  </body>
+</html>

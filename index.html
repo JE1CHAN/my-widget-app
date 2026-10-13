@@ -1,0 +1,566 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <style>
+      :root {
+        --text: #f4f4f7;
+        --muted: rgba(244, 244, 247, 0.6);
+        --hover: rgba(255, 255, 255, 0.07);
+        --field: rgba(255, 255, 255, 0.07);
+        --field-focus: rgba(255, 255, 255, 0.12);
+        --t: 120ms;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      html,
+      body {
+        height: 100%;
+        margin: 0;
+        background: transparent;
+        overflow: hidden;
+      }
+      body {
+        font:
+          14px/1.4 "Segoe UI Variable Text",
+          "Segoe UI",
+          sans-serif;
+        color: var(--text);
+      }
+      button {
+        font: inherit;
+        color: inherit;
+        background: none;
+        border: none;
+        cursor: pointer;
+      }
+      :focus-visible {
+        outline: 2px solid rgba(255, 255, 255, 0.5);
+        outline-offset: 1px;
+      }
+
+      .panel {
+        height: 100%;
+        padding: 26px 22px;
+        overflow-y: auto;
+        border-radius: 22px;
+      }
+      .panel::-webkit-scrollbar {
+        width: 0;
+      }
+      html.no-blur .panel {
+        background: rgba(26, 26, 32, 0.88);
+      }
+
+      .header {
+        -webkit-app-region: drag;
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 30px;
+      }
+      .title {
+        font-size: 26px;
+        font-weight: 600;
+        letter-spacing: -0.01em;
+      }
+      .date {
+        color: var(--muted);
+        margin-top: 2px;
+      }
+
+      section {
+        margin-bottom: 30px;
+      }
+      .section-head {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        min-height: 28px;
+        margin-bottom: 6px;
+      }
+      h2 {
+        margin: 0;
+        font-size: 13px;
+        font-weight: 600;
+        color: var(--muted);
+      }
+
+      .icon-btn {
+        -webkit-app-region: no-drag;
+        width: 28px;
+        height: 28px;
+        border-radius: 8px;
+        flex: none;
+        display: grid;
+        place-items: center;
+        color: var(--muted);
+        transition:
+          background var(--t) ease,
+          color var(--t) ease;
+      }
+      .icon-btn:hover {
+        background: var(--hover);
+        color: var(--text);
+      }
+
+      .text-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 4px 8px;
+        margin-right: -8px;
+        border-radius: 8px;
+        color: var(--muted);
+        font-size: 13px;
+        transition:
+          background var(--t) ease,
+          color var(--t) ease;
+      }
+      .text-btn:hover {
+        background: var(--hover);
+        color: var(--text);
+      }
+
+      .person-head {
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+        gap: 10px;
+        margin: 16px 0 2px;
+      }
+      .person-head .name {
+        font-weight: 600;
+      }
+      .person-head .sub {
+        color: var(--muted);
+        font-size: 12.5px;
+      }
+
+      .row {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        min-height: 36px;
+        padding: 4px 8px;
+        margin: 0 -8px;
+        border-radius: 8px;
+        transition: background var(--t) ease;
+      }
+      .row:hover {
+        background: var(--hover);
+      }
+      .row .grow {
+        flex: 1;
+        min-width: 0;
+        word-break: break-word;
+      }
+      .row .meta {
+        color: var(--muted);
+        font-size: 12.5px;
+        min-width: 92px;
+        font-variant-numeric: tabular-nums;
+      }
+      .row .status {
+        display: flex;
+        color: var(--muted);
+        width: 28px;
+        justify-content: center;
+      }
+      .row .now {
+        font-size: 12px;
+        font-weight: 600;
+      }
+      .row .del {
+        opacity: 0;
+      }
+      .row:hover .del,
+      .row:focus-within .del {
+        opacity: 1;
+      }
+      .row .icon-btn {
+        transition:
+          background var(--t) ease,
+          color var(--t) ease,
+          opacity var(--t) ease;
+      }
+      .row.done .grow {
+        text-decoration: line-through;
+        color: var(--muted);
+      }
+
+      .field {
+        width: 100%;
+        background: var(--field);
+        border: none;
+        border-radius: 8px;
+        padding: 9px 10px;
+        font: inherit;
+        color: inherit;
+        outline: none;
+        color-scheme: dark;
+        transition: background var(--t) ease;
+      }
+      .field:focus {
+        background: var(--field-focus);
+      }
+      select.field option {
+        color: #000;
+      }
+      textarea.field {
+        height: 130px;
+        resize: none;
+        display: block;
+      }
+
+      .form {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 6px;
+        margin-bottom: 8px;
+      }
+      .form[hidden] {
+        display: none;
+      }
+      .form .wide {
+        grid-column: 1 / -1;
+      }
+      .form .end {
+        grid-column: 1 / -1;
+        justify-self: end;
+      }
+      .spaced {
+        margin-top: 6px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="panel">
+      <header class="header">
+        <div>
+          <div class="title">Today</div>
+          <div class="date" id="date"></div>
+        </div>
+        <button
+          class="icon-btn"
+          id="quit"
+          data-icon="x"
+          title="Close widget"
+          aria-label="Close widget"
+        ></button>
+      </header>
+
+      <section>
+        <div class="section-head">
+          <h2>School</h2>
+          <button class="text-btn" id="openSchool">
+            Schedules <span data-icon="arrow" data-size="14"></span>
+          </button>
+        </div>
+        <div id="schoolToday"></div>
+      </section>
+
+      <section>
+        <div class="section-head"><h2>To-do</h2></div>
+        <input
+          class="field"
+          type="text"
+          id="todoInput"
+          placeholder="Add a task and press Enter"
+        />
+        <div id="todoList" class="spaced"></div>
+      </section>
+
+      <section>
+        <div class="section-head">
+          <h2>Work</h2>
+          <button
+            class="icon-btn"
+            id="toggleWork"
+            data-icon="plus"
+            title="Add work entry"
+            aria-label="Add work entry"
+          ></button>
+        </div>
+        <div class="form" id="workForm" hidden>
+          <select class="field" id="schDay">
+            <option>Mon</option>
+            <option>Tue</option>
+            <option>Wed</option>
+            <option>Thu</option>
+            <option>Fri</option>
+            <option>Sat</option>
+            <option>Sun</option>
+          </select>
+          <input class="field" type="time" id="schTime" />
+          <input
+            class="field wide"
+            type="text"
+            id="schTask"
+            placeholder="Shift or task"
+          />
+          <button class="text-btn end" id="schAdd">Add</button>
+        </div>
+        <div id="schList"></div>
+      </section>
+
+      <section>
+        <div class="section-head"><h2>Notes</h2></div>
+        <textarea
+          class="field"
+          id="notes"
+          placeholder="Write anything..."
+        ></textarea>
+      </section>
+    </div>
+
+    <script src="shared.js"></script>
+    <script>
+      let data = { todos: [], notes: "", schedule: [], classes: [] };
+      const JS_DAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+
+      document.querySelectorAll("[data-icon]").forEach((el) => {
+        el.innerHTML = icon(el.dataset.icon, Number(el.dataset.size) || 16);
+      });
+
+      function iconButton(name, label, onClick, extraClass) {
+        const b = document.createElement("button");
+        b.className = "icon-btn" + (extraClass ? " " + extraClass : "");
+        b.title = label;
+        b.setAttribute("aria-label", label);
+        b.innerHTML = icon(name);
+        b.onclick = onClick;
+        return b;
+      }
+
+      function statusLead(iconName, label) {
+        const s = document.createElement("span");
+        s.className = "status";
+        s.title = label;
+        s.setAttribute("role", "img");
+        s.setAttribute("aria-label", label);
+        s.innerHTML = icon(iconName);
+        return s;
+      }
+
+      function makeRow({ lead, meta, text, done, trail, onDelete }) {
+        const row = document.createElement("div");
+        row.className = "row" + (done ? " done" : "");
+        if (lead) row.appendChild(lead);
+        if (meta) {
+          const m = document.createElement("div");
+          m.className = "meta";
+          m.textContent = meta;
+          row.appendChild(m);
+        }
+        const t = document.createElement("div");
+        t.className = "grow";
+        t.textContent = text;
+        row.appendChild(t);
+        if (trail) row.appendChild(trail);
+        if (onDelete)
+          row.appendChild(iconButton("trash", "Delete", onDelete, "del"));
+        return row;
+      }
+
+      function todaysClasses(personId) {
+        const today = JS_DAYS[new Date().getDay()];
+        return (data.classes || [])
+          .filter((c) => ownerOf(c) === personId && c.days.includes(today))
+          .sort((a, b) => (a.start || "").localeCompare(b.start || ""));
+      }
+
+      function personStatus(list) {
+        if (!list.length) return { live: false, text: "No classes today" };
+        const live = list.find((c) => classStatus(c) === "live");
+        if (live)
+          return { live: true, text: "In class until " + fmtTime(live.end) };
+        const next = list.find((c) => classStatus(c) === "upcoming");
+        if (next)
+          return { live: false, text: "Next at " + fmtTime(next.start) };
+        return { live: false, text: "Done for the day" };
+      }
+
+      function renderSchool() {
+        const box = document.getElementById("schoolToday");
+        box.innerHTML = "";
+
+        const states = PEOPLE.map((p) => {
+          const list = todaysClasses(p.id);
+          return { p, list, st: personStatus(list) };
+        });
+
+        // together line: who is in class right now?
+        const inClass = states.filter((s) => s.st.live);
+        let text, iconName, label;
+        if (!inClass.length) {
+          text = "Both free right now";
+          iconName = "checkCircle";
+          label = "Free";
+        } else if (inClass.length === states.length) {
+          text = "Both in class right now";
+          iconName = "live";
+          label = "In class";
+        } else {
+          const free = states
+            .filter((s) => !s.st.live)
+            .map((s) => s.p.name)
+            .join(", ");
+          text =
+            inClass.map((s) => s.p.name).join(", ") +
+            " in class · " +
+            free +
+            " free";
+          iconName = "live";
+          label = "In class";
+        }
+        box.appendChild(makeRow({ lead: statusLead(iconName, label), text }));
+
+        // each person's day
+        states.forEach(({ p, list, st }) => {
+          const head = document.createElement("div");
+          head.className = "person-head";
+          const name = document.createElement("span");
+          name.className = "name";
+          name.textContent = scheduleTitle(p);
+          const sub = document.createElement("span");
+          sub.className = "sub";
+          sub.textContent = st.text;
+          head.append(name, sub);
+          box.appendChild(head);
+
+          list.forEach((c) => {
+            const s = classStatus(c);
+            let trail = null;
+            if (s === "live") {
+              trail = document.createElement("span");
+              trail.className = "now";
+              trail.textContent = "Now";
+            }
+            box.appendChild(
+              makeRow({
+                lead: statusLead(STATUS[s].icon, STATUS[s].label),
+                meta: timeRange(c),
+                text: classTitle(c),
+                done: s === "done",
+                trail,
+              }),
+            );
+          });
+        });
+      }
+
+      function render() {
+        document.getElementById("date").textContent =
+          new Date().toLocaleDateString(undefined, {
+            weekday: "long",
+            month: "long",
+            day: "numeric",
+          });
+
+        renderSchool();
+
+        const todoList = document.getElementById("todoList");
+        todoList.innerHTML = "";
+        data.todos.forEach((t, i) => {
+          const toggle = () => {
+            t.done = !t.done;
+            db.set("todos", data.todos);
+            render();
+          };
+          todoList.appendChild(
+            makeRow({
+              lead: iconButton(
+                t.done ? "checkCircle" : "circle",
+                t.done ? "Mark as not done" : "Mark as done",
+                toggle,
+              ),
+              text: t.text,
+              done: t.done,
+              onDelete: () => {
+                data.todos.splice(i, 1);
+                db.set("todos", data.todos);
+                render();
+              },
+            }),
+          );
+        });
+
+        const schList = document.getElementById("schList");
+        schList.innerHTML = "";
+        const sorted = [...data.schedule].sort(
+          (a, b) =>
+            DAY_ORDER.indexOf(a.day) - DAY_ORDER.indexOf(b.day) ||
+            (a.time || "").localeCompare(b.time || ""),
+        );
+        sorted.forEach((s) => {
+          schList.appendChild(
+            makeRow({
+              meta: s.day + (s.time ? " " + fmtTime(s.time) : ""),
+              text: s.task,
+              onDelete: () => {
+                data.schedule.splice(data.schedule.indexOf(s), 1);
+                db.set("schedule", data.schedule);
+                render();
+              },
+            }),
+          );
+        });
+      }
+
+      document.getElementById("quit").onclick = () => db.quit();
+      document.getElementById("openSchool").onclick = () => db.openSchedule();
+      document.getElementById("toggleWork").onclick = () => {
+        const f = document.getElementById("workForm");
+        f.hidden = !f.hidden;
+        if (!f.hidden) document.getElementById("schTask").focus();
+      };
+
+      document.getElementById("todoInput").addEventListener("keydown", (e) => {
+        if (e.key === "Enter" && e.target.value.trim()) {
+          data.todos.push({ text: e.target.value.trim(), done: false });
+          e.target.value = "";
+          db.set("todos", data.todos);
+          render();
+        }
+      });
+
+      document.getElementById("schAdd").onclick = () => {
+        const task = document.getElementById("schTask").value.trim();
+        if (!task) return;
+        data.schedule.push({
+          day: document.getElementById("schDay").value,
+          time: document.getElementById("schTime").value,
+          task,
+        });
+        document.getElementById("schTask").value = "";
+        db.set("schedule", data.schedule);
+        render();
+      };
+
+      let timer;
+      document.getElementById("notes").addEventListener("input", (e) => {
+        clearTimeout(timer);
+        timer = setTimeout(() => db.set("notes", e.target.value), 400);
+      });
+
+      // typing/clicking counts as "in use" so it won't auto-hide on you
+      ["keydown", "input", "mousedown"].forEach((ev) =>
+        document.addEventListener(ev, () => db.activity()),
+      );
+
+      db.onUpdate((d) => {
+        data = d;
+        render();
+      });
+
+      (async () => {
+        data = await db.load();
+        document.getElementById("notes").value = data.notes;
+        render();
+        setInterval(render, 60 * 1000); // keeps class status and the date fresh
+      })();
+    </script>
+  </body>
+</html>

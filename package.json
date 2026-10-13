@@ -1,0 +1,29 @@
+{
+  "name": "my-widget",
+  "version": "1.0.0",
+  "description": "Personal desktop widget",
+  "main": "main.js",
+  
+  "scripts": {
+    "start": "electron .",
+    "dist": "electron-builder"
+  },
+  "keywords": [],
+  "author": "JE1CHAN",
+  "license": "ISC",
+  "devDependencies": {
+    "electron": "^44.7.1",
+    "electron-builder": "^26.15.3"
+  },
+  "dependencies": {
+    "koffi": "^3.3.3"
+  },
+  "build": {
+  "appId": "com.cj.mywidget",
+  "npmRebuild": false,
+  "directories": { "output": "release" },
+  "asarUnpack": ["**/node_modules/koffi/**"],
+  "win": { "target": "nsis" },
+  "nsis": { "oneClick": true, "perMachine": false }
+  }
+}
